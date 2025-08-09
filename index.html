@@ -1059,7 +1059,7 @@
                     <input type="password" id="passwordInput" placeholder="비밀번호를 입력하세요">
                 </div>
                 
-                <button type="button" class="login-btn" id="loginBtn" onclick="handleLogin()">
+                <button type="button" class="login-btn" id="loginBtn">
                     🔑 로그인
                 </button>
                 
@@ -1244,8 +1244,25 @@
         let sortOrder = 'date-desc';
         let gridSize = 'medium';
 
-        // 페이지 로드시 로그인 상태 확인
+        // 페이지 로드시 로그인 상태 확인 및 이벤트 바인딩
         window.addEventListener('DOMContentLoaded', () => {
+            // 로그인 버튼 이벤트 바인딩
+            const loginBtn = document.getElementById('loginBtn');
+            if (loginBtn) {
+                loginBtn.addEventListener('click', handleLogin);
+            }
+            
+            // 엔터키 로그인
+            const passwordInput = document.getElementById('passwordInput');
+            if (passwordInput) {
+                passwordInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        handleLogin();
+                    }
+                });
+            }
+            
+            // 로그인 상태 확인
             checkLoginStatus();
         });
 
@@ -1272,13 +1289,18 @@
             showLoginContainer();
         }
 
-        // 로그인 처리 (form 제출 없이 순수 JavaScript)
-        function handleLogin() {
+        // 로그인 처리 함수 (전역 함수로 정의)
+        window.handleLogin = function() {
             console.log('로그인 시도 중...'); // 디버그용
             
             const memberSelect = document.getElementById('memberSelect');
             const passwordInput = document.getElementById('passwordInput');
             const errorDiv = document.getElementById('loginError');
+            
+            if (!memberSelect || !passwordInput) {
+                console.error('로그인 폼 요소를 찾을 수 없습니다.');
+                return;
+            }
             
             const selectedMember = memberSelect.value;
             const inputPassword = passwordInput.value;
@@ -1312,7 +1334,7 @@
             localStorage.setItem('family_gallery_login_time', new Date().getTime().toString());
             
             showMainContainer();
-        }
+        };
 
         // 로그인 에러 표시
         function showLoginError(message) {
