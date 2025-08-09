@@ -77,6 +77,44 @@
             position: relative;
         }
 
+        /* 업로드 섹션 스타일 */
+        .upload-section {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+        }
+
+        .upload-section h2 {
+            color: #32325d;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .upload-description {
+            color: #8898aa;
+            margin-bottom: 25px;
+            line-height: 1.6;
+        }
+
+        .form-container {
+            background: #f7fafc;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .form-iframe {
+            width: 100%;
+            height: 600px;
+            border: none;
+            border-radius: 8px;
+        }
+
         /* 설정 패널 */
         .config-panel {
             background: white;
@@ -165,35 +203,6 @@
             background: rgba(255,255,255,0.5);
         }
 
-        .input-group {
-            margin-bottom: 20px;
-        }
-
-        .input-group label {
-            display: block;
-            margin-bottom: 8px;
-            color: #525f7f;
-            font-weight: 500;
-            font-size: 0.95em;
-        }
-
-        .input-group input {
-            width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #e0e6ed;
-            border-radius: 8px;
-            font-size: 16px;
-            transition: all 0.3s ease;
-            background: #f7fafc;
-        }
-
-        .input-group input:focus {
-            outline: none;
-            border-color: var(--primary-color);
-            background: white;
-            box-shadow: 0 0 0 3px rgba(94, 114, 228, 0.1);
-        }
-
         .button-group {
             display: flex;
             gap: 12px;
@@ -241,22 +250,6 @@
         .btn-primary:hover {
             transform: translateY(-2px);
             box-shadow: 0 10px 25px rgba(94, 114, 228, 0.3);
-        }
-
-        .btn-success {
-            background: linear-gradient(135deg, var(--success-color) 0%, #26b569 100%);
-            color: white;
-        }
-
-        .btn-success:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(45, 206, 137, 0.3);
-        }
-
-        .btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none !important;
         }
 
         /* 상태 메시지 */
@@ -686,6 +679,10 @@
                 width: 100%;
                 justify-content: space-around;
             }
+
+            .form-iframe {
+                height: 700px;
+            }
         }
 
         /* 빈 상태 */
@@ -704,6 +701,13 @@
         .empty-state-text {
             font-size: 1.2em;
         }
+
+        /* 구분선 스타일 */
+        .divider {
+            height: 2px;
+            background: linear-gradient(to right, transparent, #e0e6ed, transparent);
+            margin: 40px 0;
+        }
     </style>
 </head>
 <body>
@@ -713,6 +717,39 @@
             <h1>📸 우리 가족 사진첩</h1>
             <p>소중한 순간들을 함께 나누어요</p>
         </div>
+
+        <!-- 사진 업로드 섹션 -->
+        <div class="upload-section">
+            <h2>📤 새로운 사진 올리기</h2>
+            <p class="upload-description">
+                가족 사진을 추가하려면 아래 양식을 사용하세요. 
+                업로드된 사진은 Google Drive의 family_images 폴더에 자동으로 저장됩니다.
+            </p>
+            
+            <div class="form-container">
+                <iframe 
+                    src="https://docs.google.com/forms/d/e/1FAIpQLSfVrnJ-VWY41v5ZQJpbgpPD86IB_-rKj17R3vy7hoZDY4i7ag/viewform?embedded=true" 
+                    class="form-iframe"
+                    frameborder="0" 
+                    marginheight="0" 
+                    marginwidth="0">
+                    로드 중...
+                </iframe>
+            </div>
+            
+            <div class="info-box">
+                <h3>📋 업로드 안내</h3>
+                <ol>
+                    <li>파일 선택 버튼을 클릭하여 사진을 선택하세요</li>
+                    <li>한 번에 최대 10개까지 업로드 가능합니다</li>
+                    <li>지원 형식: JPG, PNG, GIF 등 모든 이미지 파일</li>
+                    <li>업로드 후 아래 갤러리를 새로고침하면 새 사진을 볼 수 있습니다</li>
+                </ol>
+            </div>
+        </div>
+
+        <!-- 구분선 -->
+        <div class="divider"></div>
 
         <!-- 설정 패널 -->
         <div class="config-panel">
@@ -770,8 +807,9 @@
             <div id="statusMessage" class="status-message"></div>
             
             <div class="info-box">
-                <h3>📋 사용 안내</h3>
+                <h3>💡 갤러리 사용 안내</h3>
                 <ol>
+                    <li>업로드한 사진을 보려면 "갤러리 새로고침" 버튼을 클릭하세요</li>
                     <li>페이지당 표시할 이미지 갯수를 선택할 수 있습니다</li>
                     <li>정렬 방식과 그리드 크기를 조절할 수 있습니다</li>
                     <li>사진을 클릭하면 크게 볼 수 있습니다</li>
@@ -1107,8 +1145,8 @@
             currentPage = page;
             displayCurrentPage();
             
-            // 페이지 상단으로 스크롤
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            // 갤러리 섹션으로 스크롤
+            document.getElementById('galleryInfoBar').scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
 
         // 갤러리 표시
