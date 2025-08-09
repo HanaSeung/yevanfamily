@@ -1059,7 +1059,7 @@
                     <input type="password" id="passwordInput" placeholder="비밀번호를 입력하세요">
                 </div>
                 
-                <button type="button" class="login-btn" id="loginBtn">
+                  <button class="login-btn" id="loginBtn" onclick="handleLogin()">
                     🔑 로그인
                 </button>
                 
@@ -1291,25 +1291,14 @@
 
         // 로그인 처리 함수 (전역 함수로 정의)
         window.handleLogin = function() {
-            console.log('로그인 시도 중...'); // 디버그용
-            
             const memberSelect = document.getElementById('memberSelect');
             const passwordInput = document.getElementById('passwordInput');
-            const errorDiv = document.getElementById('loginError');
             
-            if (!memberSelect || !passwordInput) {
-                console.error('로그인 폼 요소를 찾을 수 없습니다.');
-                return;
-            }
+            if (!memberSelect || !passwordInput) return;
             
             const selectedMember = memberSelect.value;
             const inputPassword = passwordInput.value;
             
-            console.log('선택된 구성원:', selectedMember); // 디버그용
-            console.log('입력된 비밀번호:', inputPassword); // 디버그용
-            console.log('정답 비밀번호:', familyPassword); // 디버그용
-            
-            // 유효성 검사
             if (!selectedMember) {
                 showLoginError('가족 구성원을 선택해주세요.');
                 return;
@@ -1326,9 +1315,6 @@
                 return;
             }
             
-            console.log('로그인 성공!'); // 디버그용
-            
-            // 로그인 성공
             currentUser = selectedMember;
             localStorage.setItem('family_gallery_user', selectedMember);
             localStorage.setItem('family_gallery_login_time', new Date().getTime().toString());
