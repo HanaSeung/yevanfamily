@@ -32,6 +32,7 @@
             max-width: 1200px;
             margin: 0 auto;
             padding: 20px;
+            padding-bottom: 100px; /* 하단 버튼 공간 확보 */
         }
 
         /* 헤더 스타일 */
@@ -75,44 +76,6 @@
             font-size: 1.2em;
             color: rgba(255,255,255,0.9);
             position: relative;
-        }
-
-        /* 업로드 섹션 스타일 */
-        .upload-section {
-            background: white;
-            border-radius: 15px;
-            padding: 30px;
-            margin-bottom: 30px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.08);
-        }
-
-        .upload-section h2 {
-            color: #32325d;
-            margin-bottom: 20px;
-            font-size: 1.8em;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .upload-description {
-            color: #8898aa;
-            margin-bottom: 25px;
-            line-height: 1.6;
-        }
-
-        .form-container {
-            background: #f7fafc;
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 20px;
-        }
-
-        .form-iframe {
-            width: 100%;
-            height: 600px;
-            border: none;
-            border-radius: 8px;
         }
 
         /* 설정 패널 */
@@ -600,7 +563,137 @@
             transform: rotate(90deg);
         }
 
-        /* 안내 박스 */
+        /* 하단 고정 업로드 버튼 */
+        .upload-floating-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 8px 25px rgba(94, 114, 228, 0.4);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: white;
+            z-index: 100;
+        }
+
+        .upload-floating-btn:hover {
+            transform: scale(1.1) rotate(15deg);
+            box-shadow: 0 12px 35px rgba(94, 114, 228, 0.6);
+        }
+
+        /* 업로드 모달 */
+        .upload-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1001;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .upload-modal.active {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .upload-modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 0;
+            max-width: 800px;
+            width: 100%;
+            max-height: 90vh;
+            overflow: hidden;
+            position: relative;
+            animation: modalSlideIn 0.3s ease;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9) translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .upload-modal-header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            padding: 25px 30px;
+            position: relative;
+        }
+
+        .upload-modal-header h2 {
+            margin: 0;
+            font-size: 1.8em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .upload-modal-close {
+            position: absolute;
+            top: 20px;
+            right: 25px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .upload-modal-close:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: rotate(90deg);
+        }
+
+        .upload-modal-body {
+            padding: 30px;
+        }
+
+        .upload-description {
+            color: #8898aa;
+            margin-bottom: 25px;
+            line-height: 1.6;
+        }
+
+        .form-container {
+            background: #f7fafc;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .form-iframe {
+            width: 100%;
+            height: 500px;
+            border: none;
+            border-radius: 8px;
+        }
+
         .info-box {
             background: linear-gradient(135deg, #f6f9fc 0%, #eef2f7 100%);
             border-left: 4px solid var(--primary-color);
@@ -629,6 +722,30 @@
 
         .info-box a:hover {
             text-decoration: underline;
+        }
+
+        /* 빈 상태 */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #8898aa;
+        }
+
+        .empty-state-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .empty-state-text {
+            font-size: 1.2em;
+        }
+
+        /* 구분선 스타일 */
+        .divider {
+            height: 2px;
+            background: linear-gradient(to right, transparent, #e0e6ed, transparent);
+            margin: 40px 0;
         }
 
         /* 반응형 디자인 */
@@ -681,32 +798,21 @@
             }
 
             .form-iframe {
-                height: 700px;
+                height: 400px;
             }
-        }
 
-        /* 빈 상태 */
-        .empty-state {
-            text-align: center;
-            padding: 60px 20px;
-            color: #8898aa;
-        }
+            .upload-modal-content {
+                margin: 10px;
+                max-height: 95vh;
+            }
 
-        .empty-state-icon {
-            font-size: 4em;
-            margin-bottom: 20px;
-            opacity: 0.5;
-        }
-
-        .empty-state-text {
-            font-size: 1.2em;
-        }
-
-        /* 구분선 스타일 */
-        .divider {
-            height: 2px;
-            background: linear-gradient(to right, transparent, #e0e6ed, transparent);
-            margin: 40px 0;
+            .upload-floating-btn {
+                bottom: 20px;
+                right: 20px;
+                width: 50px;
+                height: 50px;
+                font-size: 20px;
+            }
         }
     </style>
 </head>
@@ -717,50 +823,6 @@
             <h1>📸 우리 가족 사진첩</h1>
             <p>소중한 순간들을 함께 나누어요</p>
         </div>
-
-        <!-- 사진 업로드 섹션 -->
-        <div class="upload-section">
-            <h2>📤 새로운 사진 올리기</h2>
-            <p class="upload-description">
-                가족 사진을 추가하려면 아래 양식을 사용하세요. 
-                업로드된 사진은 Google Drive의 family_images 폴더에 자동으로 저장됩니다.
-            </p>
-            
-            <div class="form-container">
-                <iframe 
-                    src="https://docs.google.com/forms/d/1GdcWCg0uBFcRDAq4jGbZZLnHbQDVpw-KqzUFn7iBOjU/viewform?embedded=true" 
-                    class="form-iframe"
-                    frameborder="0" 
-                    marginheight="0" 
-                    marginwidth="0">
-                    로드 중...
-                </iframe>
-            </div>
-            
-            <div class="info-box">
-                <h3>📋 업로드 안내</h3>
-                <ol>
-                    <li>파일 선택 버튼을 클릭하여 사진을 선택하세요</li>
-                    <li>한 번에 최대 10개까지 업로드 가능합니다</li>
-                    <li>지원 형식: JPG, PNG, GIF 등 모든 이미지 파일</li>
-                    <li>업로드 후 아래 갤러리를 새로고침하면 새 사진을 볼 수 있습니다</li>
-                </ol>
-            </div>
-            <!-- ⭐ 여기에 새로 추가 ⭐ -->
-    <div class="info-box" style="background: linear-gradient(135deg, #d4f4e2 0%, #c8f0d8 100%); border-left-color: #2dce89;">
-        <h3 style="color: #2dce89;">✅ 업로드 완료 후</h3>
-        <p style="color: #0f5132; margin-bottom: 10px;">
-            업로드한 사진은 <strong>5분 이내</strong>에 자동으로 갤러리에 표시됩니다.
-        </p>
-        <p style="color: #0f5132;">
-            바로 보시려면 아래 <strong>"갤러리 새로고침"</strong> 버튼을 클릭하세요.
-        </p>
-    </div>
-            
-        </div> <!-- upload-section 끝 -->
-
-        <!-- 구분선 -->
-        <div class="divider"></div>
 
         <!-- 설정 패널 -->
         <div class="config-panel">
@@ -799,16 +861,6 @@
                 </div>
             </div>
 
-            <div class="input-group" style="display: none;">
-                <label for="apiKey">Google API Key</label>
-                <input type="password" id="apiKey" placeholder="AIzaSy... 형식의 API 키를 입력하세요">
-            </div>
-            
-            <div class="input-group" style="display: none;">
-                <label for="folderId">Google Drive 폴더 ID</label>
-                <input type="text" id="folderId" value="1pN6No6RsmybXmr_5MetNsny7bzKDsLQ-" placeholder="폴더 ID 입력">
-            </div>
-            
             <div class="button-group">
                 <button class="btn btn-primary" onclick="loadGallery()" id="loadBtn">
                     <span>🔄</span> 갤러리 새로고침
@@ -820,6 +872,7 @@
             <div class="info-box">
                 <h3>💡 갤러리 사용 안내</h3>
                 <ol>
+                    <li>새 사진을 업로드하려면 우하단의 ➕ 버튼을 클릭하세요</li>
                     <li>업로드한 사진을 보려면 "갤러리 새로고침" 버튼을 클릭하세요</li>
                     <li>페이지당 표시할 이미지 갯수를 선택할 수 있습니다</li>
                     <li>정렬 방식과 그리드 크기를 조절할 수 있습니다</li>
@@ -852,13 +905,65 @@
 
         <!-- 페이지네이션 -->
         <div id="pagination" class="pagination" style="display: none;"></div>
+    </div>
 
-        <!-- 라이트박스 -->
-        <div class="lightbox" id="lightbox" onclick="closeLightbox(event)">
-            <div class="lightbox-close" onclick="closeLightbox(event)">×</div>
-            <div class="lightbox-content">
-                <img id="lightboxImage" src="" alt="">
+    <!-- 하단 고정 업로드 버튼 -->
+    <button class="upload-floating-btn" onclick="openUploadModal()" title="새 사진 업로드">
+        ➕
+    </button>
+
+    <!-- 업로드 모달 -->
+    <div class="upload-modal" id="uploadModal" onclick="closeUploadModal(event)">
+        <div class="upload-modal-content">
+            <div class="upload-modal-header">
+                <h2>📤 새로운 사진 올리기</h2>
+                <button class="upload-modal-close" onclick="closeUploadModal(event)">×</button>
             </div>
+            <div class="upload-modal-body">
+                <p class="upload-description">
+                    가족 사진을 추가하려면 아래 양식을 사용하세요. 
+                    업로드된 사진은 Google Drive의 family_images 폴더에 자동으로 저장됩니다.
+                </p>
+                
+                <div class="form-container">
+                    <iframe 
+                        src="https://docs.google.com/forms/d/1GdcWCg0uBFcRDAq4jGbZZLnHbQDVpw-KqzUFn7iBOjU/viewform?embedded=true" 
+                        class="form-iframe"
+                        frameborder="0" 
+                        marginheight="0" 
+                        marginwidth="0">
+                        로드 중...
+                    </iframe>
+                </div>
+                
+                <div class="info-box">
+                    <h3>📋 업로드 안내</h3>
+                    <ol>
+                        <li>파일 선택 버튼을 클릭하여 사진을 선택하세요</li>
+                        <li>한 번에 최대 10개까지 업로드 가능합니다</li>
+                        <li>지원 형식: JPG, PNG, GIF 등 모든 이미지 파일</li>
+                        <li>업로드 후 모달을 닫고 갤러리를 새로고침하면 새 사진을 볼 수 있습니다</li>
+                    </ol>
+                </div>
+                
+                <div class="info-box" style="background: linear-gradient(135deg, #d4f4e2 0%, #c8f0d8 100%); border-left-color: #2dce89;">
+                    <h3 style="color: #2dce89;">✅ 업로드 완료 후</h3>
+                    <p style="color: #0f5132; margin-bottom: 10px;">
+                        업로드한 사진은 <strong>5분 이내</strong>에 자동으로 갤러리에 표시됩니다.
+                    </p>
+                    <p style="color: #0f5132;">
+                        바로 보시려면 모달을 닫고 <strong>"갤러리 새로고침"</strong> 버튼을 클릭하세요.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 라이트박스 -->
+    <div class="lightbox" id="lightbox" onclick="closeLightbox(event)">
+        <div class="lightbox-close" onclick="closeLightbox(event)">×</div>
+        <div class="lightbox-content">
+            <img id="lightboxImage" src="" alt="">
         </div>
     </div>
 
@@ -875,10 +980,6 @@
 
         // 페이지 로드시 자동으로 갤러리 로드
         window.addEventListener('DOMContentLoaded', () => {
-            // API 키와 폴더 ID 자동 입력
-            document.getElementById('apiKey').value = apiKey;
-            document.getElementById('folderId').value = folderId;
-            
             // 저장된 설정 불러오기
             const savedItemsPerPage = localStorage.getItem('gallery_items_per_page');
             const savedSortOrder = localStorage.getItem('gallery_sort_order');
@@ -906,14 +1007,43 @@
                 loadGallery();
             }, 2000);
 
-             // 5분마다 자동 새로고침 (새로 추가)
-    setInterval(() => {
-        console.log('자동 새로고침 실행');
-        loadGallery();
-        showStatus('🔄 새 사진을 확인했습니다', 'info');
-    }, 300000); // 5분마다
-            
+            // 5분마다 자동 새로고침
+            setInterval(() => {
+                console.log('자동 새로고침 실행');
+                loadGallery();
+                showStatus('🔄 새 사진을 확인했습니다', 'info');
+            }, 300000); // 5분마다
         });
+
+        // 업로드 모달 열기
+        function openUploadModal() {
+            const modal = document.getElementById('uploadModal');
+            modal.classList.add('active');
+            
+            // ESC 키 이벤트 추가
+            document.addEventListener('keydown', handleUploadModalEsc);
+        }
+
+        // 업로드 모달 닫기
+        function closeUploadModal(event) {
+            if (event && event.target !== event.currentTarget && 
+                !event.target.classList.contains('upload-modal-close')) {
+                return;
+            }
+            
+            const modal = document.getElementById('uploadModal');
+            modal.classList.remove('active');
+            
+            // ESC 키 이벤트 제거
+            document.removeEventListener('keydown', handleUploadModalEsc);
+        }
+
+        // 업로드 모달 ESC 키 핸들러
+        function handleUploadModalEsc(event) {
+            if (event.key === 'Escape') {
+                closeUploadModal(event);
+            }
+        }
 
         // 상태 메시지 표시
         function showStatus(message, type = 'info') {
@@ -954,7 +1084,16 @@
             document.querySelectorAll('.view-mode-btn').forEach(btn => {
                 btn.classList.remove('active');
             });
-            event?.target?.classList.add('active');
+            
+            // 현재 클릭된 버튼을 찾아서 활성화
+            const buttons = document.querySelectorAll('.view-mode-btn');
+            buttons.forEach(btn => {
+                if ((btn.textContent === '작게' && size === 'small') ||
+                    (btn.textContent === '보통' && size === 'medium') ||
+                    (btn.textContent === '크게' && size === 'large')) {
+                    btn.classList.add('active');
+                }
+            });
             
             // 갤러리 클래스 변경
             const gallery = document.querySelector('.gallery');
