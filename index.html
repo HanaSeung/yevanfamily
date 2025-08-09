@@ -1119,7 +1119,7 @@
             
             files.forEach((file, index) => {
                 const thumbnailUrl = `https://drive.google.com/thumbnail?id=${file.id}&sz=w400`;
-                const fullImageUrl = `https://drive.google.com/uc?export=view&id=${file.id}`;
+                const fullImageUrl = `https://drive.google.com/thumbnail?id=${file.id}&sz=w1600-h1600`;
                 
                 const createdDate = file.createdTime ? 
                     new Date(file.createdTime).toLocaleDateString('ko-KR', {
