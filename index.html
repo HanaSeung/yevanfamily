@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="가족 사진 갤러리 - Google Drive 연동">
+    <title>우리 가족 사진첩</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #5e72e4;
+            --secondary-color: #825ee4;
+            --success-color: #2dce89;
+            --error-color: #f5365c;
+            --warning-color: #fb6340;
+            --info-color: #11cdef;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(150deg, #f4f5f7 0%, #ffffff 50%, #f4f5f7 100%);
+            min-height: 100vh;
+            color: #32325d;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* 헤더 스타일 */
+        .header {
+            text-align: center;
+            padding: 60px 20px 40px;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            border-radius: 20px;
+            margin-bottom: 40px;
+            box-shadow: 0 15px 35px rgba(50, 50, 93, 0.1), 0 5px 15px rgba(0, 0, 0, 0.07);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: shimmer 15s linear infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .header h1 {
+            font-size: 3em;
+            color: white;
+            margin-bottom: 15px;
+            font-weight: 700;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+            position: relative;
+        }
+
+        .header p {
+            font-size: 1.2em;
+            color: rgba(255,255,255,0.9);
+            position: relative;
+        }
+
+        /* 설정 패널 */
+        .config-panel {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+        }
+
+        .config-panel h2 {
+            color: #32325d;
+            margin-bottom: 25px;
+            font-size: 1.5em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #525f7f;
+            font-weight: 500;
+            font-size: 0.95em;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e6ed;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: #f7fafc;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            background: white;
+            box-shadow: 0 0 0 3px rgba(94, 114, 228, 0.1);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.5s, height 0.5s;
+        }
+
+        .btn:active::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(94, 114, 228, 0.3);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, var(--success-color) 0%, #26b569 100%);
+            color: white;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(45, 206, 137, 0.3);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        /* 상태 메시지 */
+        .status-message {
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            display: none;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .status-message.show {
+            display: block;
+        }
+
+        .status-success {
+            background: linear-gradient(135deg, #d4f4e2 0%, #c8f0d8 100%);
+            color: #0f5132;
+            border: 1px solid #a3d5b8;
+        }
+
+        .status-error {
+            background: linear-gradient(135deg, #fde2e4 0%, #fcd5d9 100%);
+            color: #842029;
+            border: 1px solid #f5c2c7;
+        }
+
+        .status-info {
+            background: linear-gradient(135deg, #cff4fc 0%, #b6effb 100%);
+            color: #055160;
+            border: 1px solid #86d7e8;
+        }
+
+        /* 갤러리 */
+        .gallery-container {
+            margin-top: 40px;
+        }
+
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+            animation: fadeInUp 0.6s ease;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .image-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            position: relative;
+        }
+
+        .image-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+        }
+
+        .image-card .image-wrapper {
+            position: relative;
+            width: 100%;
+            height: 200px;
+            overflow: hidden;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        }
+
+        .image-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .image-card:hover img {
+            transform: scale(1.1);
+        }
+
+        .image-card .image-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.7) 100%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            display: flex;
+            align-items: flex-end;
+            padding: 15px;
+        }
+
+        .image-card:hover .image-overlay {
+            opacity: 1;
+        }
+
+        .image-overlay .view-icon {
+            color: white;
+            font-size: 1.2em;
+        }
+
+        .image-info {
+            padding: 18px;
+        }
+
+        .image-name {
+            font-weight: 600;
+            color: #32325d;
+            margin-bottom: 8px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-size: 1.05em;
+        }
+
+        .image-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9em;
+            color: #8898aa;
+        }
+
+        /* 로딩 애니메이션 */
+        .loading {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 50px;
+            height: 50px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            margin-top: 20px;
+            color: #8898aa;
+            font-size: 1.1em;
+        }
+
+        /* 라이트박스 */
+        .lightbox {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 1000;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .lightbox.active {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .lightbox-content {
+            position: relative;
+            max-width: 90%;
+            max-height: 90%;
+        }
+
+        .lightbox img {
+            max-width: 100%;
+            max-height: 90vh;
+            border-radius: 8px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        .lightbox-close {
+            position: absolute;
+            top: 30px;
+            right: 30px;
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: white;
+            font-size: 24px;
+        }
+
+        .lightbox-close:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: rotate(90deg);
+        }
+
+        /* 안내 박스 */
+        .info-box {
+            background: linear-gradient(135deg, #f6f9fc 0%, #eef2f7 100%);
+            border-left: 4px solid var(--primary-color);
+            padding: 20px;
+            margin-top: 25px;
+            border-radius: 8px;
+        }
+
+        .info-box h3 {
+            color: var(--primary-color);
+            margin-bottom: 12px;
+            font-size: 1.1em;
+        }
+
+        .info-box ol {
+            margin-left: 20px;
+            color: #525f7f;
+            line-height: 1.8;
+        }
+
+        .info-box a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .info-box a:hover {
+            text-decoration: underline;
+        }
+
+        /* 반응형 디자인 */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2em;
+            }
+
+            .gallery {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+                gap: 15px;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        /* 빈 상태 */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #8898aa;
+        }
+
+        .empty-state-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .empty-state-text {
+            font-size: 1.2em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 헤더 -->
+        <div class="header">
+            <h1>📸 우리 가족 사진첩</h1>
+            <p>소중한 순간들을 함께 나누어요</p>
+        </div>
+
+        <!-- 설정 패널 -->
+        <div class="config-panel">
+            <h2>⚙️ Google Drive 연결 설정</h2>
+            
+            <div class="input-group">
+                <label for="apiKey">Google API Key</label>
+                <input type="password" id="apiKey" placeholder="AIzaSy... 형식의 API 키를 입력하세요">
+            </div>
+            
+            <div class="input-group">
+                <label for="folderId">Google Drive 폴더 ID</label>
+                <input type="text" id="folderId" value="1LnsU_yxcV3u7s5gqMvxXzhHewS91POww" placeholder="폴더 ID 입력">
+            </div>
+            
+            <div class="button-group">
+                <button class="btn btn-success" onclick="testConnection()">
+                    <span>🔌</span> 연결 테스트
+                </button>
+                <button class="btn btn-primary" onclick="loadGallery()" id="loadBtn">
+                    <span>🖼️</span> 갤러리 불러오기
+                </button>
+            </div>
+            
+            <div id="statusMessage" class="status-message"></div>
+            
+            <div class="info-box">
+                <h3>📋 사용 방법</h3>
+                <ol>
+                    <li><a href="https://console.cloud.google.com/" target="_blank">Google Cloud Console</a>에 접속</li>
+                    <li>프로젝트 생성 후 Google Drive API 활성화</li>
+                    <li>사용자 인증 정보 → API 키 만들기</li>
+                    <li>API 키 제한사항 설정:
+                        <ul>
+                            <li>애플리케이션 제한: HTTP 리퍼러</li>
+                            <li>웹사이트 제한: https://[your-github-username].github.io/*</li>
+                        </ul>
+                    </li>
+                    <li>Google Drive 폴더를 "링크가 있는 모든 사용자"로 공유</li>
+                </ol>
+            </div>
+        </div>
+
+        <!-- 갤러리 컨테이너 -->
+        <div id="galleryContainer" class="gallery-container"></div>
+
+        <!-- 라이트박스 -->
+        <div class="lightbox" id="lightbox" onclick="closeLightbox(event)">
+            <div class="lightbox-close" onclick="closeLightbox(event)">×</div>
+            <div class="lightbox-content">
+                <img id="lightboxImage" src="" alt="">
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 전역 변수
+        let images = [];
+        let apiKey = '';
+        let folderId = '';
+
+        // 페이지 로드시 저장된 설정 불러오기
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedApiKey = localStorage.getItem('gallery_api_key');
+            const savedFolderId = localStorage.getItem('gallery_folder_id');
+            
+            if (savedApiKey) {
+                document.getElementById('apiKey').value = savedApiKey;
+            }
+            
+            if (savedFolderId) {
+                document.getElementById('folderId').value = savedFolderId;
+            }
+            
+            showStatus('🎉 환영합니다! API 키를 입력하고 연결 테스트를 해보세요.', 'info');
+        });
+
+        // 상태 메시지 표시
+        function showStatus(message, type = 'info') {
+            const statusDiv = document.getElementById('statusMessage');
+            statusDiv.className = `status-message status-${type} show`;
+            statusDiv.innerHTML = message;
+            
+            // 5초 후 자동 숨김
+            setTimeout(() => {
+                statusDiv.classList.remove('show');
+            }, 5000);
+        }
+
+        // API 연결 테스트
+        async function testConnection() {
+            apiKey = document.getElementById('apiKey').value.trim();
+            
+            if (!apiKey) {
+                showStatus('⚠️ API 키를 입력해주세요.', 'error');
+                return;
+            }
+            
+            showStatus('🔄 연결 테스트 중...', 'info');
+            
+            try {
+                // Google Books API로 간단한 테스트
+                const testUrl = `https://www.googleapis.com/books/v1/volumes?q=test&key=${apiKey}&maxResults=1`;
+                const response = await fetch(testUrl);
+                
+                if (response.ok) {
+                    // API 키 저장
+                    localStorage.setItem('gallery_api_key', apiKey);
+                    showStatus('✅ 연결 성공! 이제 갤러리를 불러올 수 있습니다.', 'success');
+                    document.getElementById('loadBtn').disabled = false;
+                } else {
+                    const error = await response.json();
+                    showStatus(`❌ API 키 오류: ${error.error?.message || '인증 실패'}`, 'error');
+                }
+            } catch (error) {
+                showStatus(`❌ 네트워크 오류: ${error.message}`, 'error');
+            }
+        }
+
+        // 갤러리 불러오기
+        async function loadGallery() {
+            apiKey = document.getElementById('apiKey').value.trim();
+            folderId = document.getElementById('folderId').value.trim();
+            
+            if (!apiKey || !folderId) {
+                showStatus('⚠️ API 키와 폴더 ID를 모두 입력해주세요.', 'error');
+                return;
+            }
+            
+            // 설정 저장
+            localStorage.setItem('gallery_api_key', apiKey);
+            localStorage.setItem('gallery_folder_id', folderId);
+            
+            const container = document.getElementById('galleryContainer');
+            container.innerHTML = `
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    <div class="loading-text">사진을 불러오는 중...</div>
+                </div>
+            `;
+            
+            showStatus('🔄 Google Drive에서 이미지를 가져오는 중...', 'info');
+            
+            try {
+                // Google Drive API v3 호출
+                const url = `https://www.googleapis.com/drive/v3/files?q='${folderId}'+in+parents+and+(mimeType+contains+'image/')&key=${apiKey}&fields=files(id,name,mimeType,createdTime,size,thumbnailLink,webContentLink)&pageSize=100&orderBy=createdTime+desc`;
+                
+                const response = await fetch(url);
+                
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error?.message || `HTTP ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                if (!data.files || data.files.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">📭</div>
+                            <div class="empty-state-text">폴더에 이미지가 없거나 접근 권한이 없습니다.</div>
+                        </div>
+                    `;
+                    showStatus('📭 이미지를 찾을 수 없습니다. 폴더 공유 설정을 확인해주세요.', 'error');
+                    return;
+                }
+                
+                images = data.files;
+                displayGallery(images);
+                showStatus(`✅ ${images.length}개의 사진을 성공적으로 불러왔습니다!`, 'success');
+                
+            } catch (error) {
+                console.error('Error:', error);
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">❌</div>
+                        <div class="empty-state-text">오류가 발생했습니다: ${error.message}</div>
+                    </div>
+                `;
+                showStatus(`❌ 오류: ${error.message}`, 'error');
+            }
+        }
+
+        // 갤러리 표시
+        function displayGallery(files) {
+            const container = document.getElementById('galleryContainer');
+            
+            let galleryHTML = '<div class="gallery">';
+            
+            files.forEach((file, index) => {
+                const thumbnailUrl = `https://drive.google.com/thumbnail?id=${file.id}&sz=w400`;
+                const fullImageUrl = `https://drive.google.com/uc?export=view&id=${file.id}`;
+                
+                const createdDate = file.createdTime ? 
+                    new Date(file.createdTime).toLocaleDateString('ko-KR', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric'
+                    }) : '';
+                
+                const fileSize = file.size ? 
+                    formatFileSize(parseInt(file.size)) : '';
+                
+                galleryHTML += `
+                    <div class="image-card" onclick="openLightbox('${fullImageUrl}', '${file.name}')">
+                        <div class="image-wrapper">
+                            <img src="${thumbnailUrl}" 
+                                 alt="${file.name}" 
+                                 loading="lazy"
+                                 onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'400\\' height=\\'300\\' viewBox=\\'0 0 400 300\\'%3E%3Crect width=\\'400\\' height=\\'300\\' fill=\\'%23f0f0f0\\'/%3E%3Ctext x=\\'50%25\\' y=\\'50%25\\' text-anchor=\\'middle\\' dy=\\'.3em\\' fill=\\'%23999\\' font-family=\\'sans-serif\\' font-size=\\'20\\'%3E이미지 로드 실패%3C/text%3E%3C/svg%3E';">
+                            <div class="image-overlay">
+                                <span class="view-icon">🔍 크게 보기</span>
+                            </div>
+                        </div>
+                        <div class="image-info">
+                            <div class="image-name" title="${file.name}">${file.name}</div>
+                            <div class="image-meta">
+                                <span>${createdDate}</span>
+                                <span>${fileSize}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            galleryHTML += '</div>';
+            container.innerHTML = galleryHTML;
+        }
+
+        // 파일 크기 포맷
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+        }
+
+        // 라이트박스 열기
+        function openLightbox(imageUrl, imageName) {
+            const lightbox = document.getElementById('lightbox');
+            const lightboxImage = document.getElementById('lightboxImage');
+            
+            lightboxImage.src = imageUrl;
+            lightboxImage.alt = imageName || '';
+            lightbox.classList.add('active');
+            
+            // ESC 키 이벤트 추가
+            document.addEventListener('keydown', handleEscKey);
+        }
+
+        // 라이트박스 닫기
+        function closeLightbox(event) {
+            if (event && event.target !== event.currentTarget && !event.target.classList.contains('lightbox-close')) {
+                return;
+            }
+            
+            const lightbox = document.getElementById('lightbox');
+            lightbox.classList.remove('active');
+            
+            // ESC 키 이벤트 제거
+            document.removeEventListener('keydown', handleEscKey);
+        }
+
+        // ESC 키 핸들러
+        function handleEscKey(event) {
+            if (event.key === 'Escape') {
+                closeLightbox(event);
+            }
+        }
+
+        // 이미지 미리 로드 (성능 향상)
+        function preloadImage(url) {
+            const img = new Image();
+            img.src = url;
+        }
+
+        // 갤러리 이미지 지연 로딩
+        if ('IntersectionObserver' in window) {
+            const imageObserver = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const img = entry.target;
+                        img.src = img.dataset.src;
+                        img.classList.remove('lazy');
+                        imageObserver.unobserve(img);
+                    }
+                });
+            });
+
+            document.addEventListener('DOMContentLoaded', () => {
+                const lazyImages = document.querySelectorAll('img.lazy');
+                lazyImages.forEach(img => imageObserver.observe(img));
+            });
+        }
+    </script>
+</body>
+</html>
