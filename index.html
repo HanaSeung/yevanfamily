@@ -499,42 +499,33 @@
 
         <!-- 설정 패널 -->
         <div class="config-panel">
-            <h2>⚙️ Google Drive 연결 설정</h2>
+            <h2>⚙️ Google Drive 갤러리</h2>
             
-            <div class="input-group">
+            <div class="input-group" style="display: none;">
                 <label for="apiKey">Google API Key</label>
                 <input type="password" id="apiKey" placeholder="AIzaSy... 형식의 API 키를 입력하세요">
             </div>
             
-            <div class="input-group">
+            <div class="input-group" style="display: none;">
                 <label for="folderId">Google Drive 폴더 ID</label>
                 <input type="text" id="folderId" value="1LnsU_yxcV3u7s5gqMvxXzhHewS91POww" placeholder="폴더 ID 입력">
             </div>
             
             <div class="button-group">
-                <button class="btn btn-success" onclick="testConnection()">
-                    <span>🔌</span> 연결 테스트
-                </button>
                 <button class="btn btn-primary" onclick="loadGallery()" id="loadBtn">
-                    <span>🖼️</span> 갤러리 불러오기
+                    <span>🔄</span> 갤러리 새로고침
                 </button>
             </div>
             
             <div id="statusMessage" class="status-message"></div>
             
             <div class="info-box">
-                <h3>📋 사용 방법</h3>
+                <h3>📋 사용 안내</h3>
                 <ol>
-                    <li><a href="https://console.cloud.google.com/" target="_blank">Google Cloud Console</a>에 접속</li>
-                    <li>프로젝트 생성 후 Google Drive API 활성화</li>
-                    <li>사용자 인증 정보 → API 키 만들기</li>
-                    <li>API 키 제한사항 설정:
-                        <ul>
-                            <li>애플리케이션 제한: HTTP 리퍼러</li>
-                            <li>웹사이트 제한: https://[your-github-username].github.io/*</li>
-                        </ul>
-                    </li>
-                    <li>Google Drive 폴더를 "링크가 있는 모든 사용자"로 공유</li>
+                    <li>이 갤러리는 Google Drive의 공개 폴더에서 자동으로 이미지를 불러옵니다</li>
+                    <li>새로운 사진이 추가되면 "갤러리 새로고침" 버튼을 클릭하세요</li>
+                    <li>사진을 클릭하면 크게 볼 수 있습니다</li>
+                    <li>ESC 키를 누르면 큰 화면을 닫을 수 있습니다</li>
                 </ol>
             </div>
         </div>
@@ -554,23 +545,21 @@
     <script>
         // 전역 변수
         let images = [];
-        let apiKey = '';
-        let folderId = '';
+        let apiKey = 'AIzaSyCdRYRtoUk2Mu_mYzk7S95sdCMzsyZ2mYE'; // API 키 하드코딩
+        let folderId = '1LnsU_yxcV3u7s5gqMvxXzhHewS91POww'; // 폴더 ID 하드코딩
 
-        // 페이지 로드시 저장된 설정 불러오기
+        // 페이지 로드시 자동으로 갤러리 로드
         window.addEventListener('DOMContentLoaded', () => {
-            const savedApiKey = localStorage.getItem('gallery_api_key');
-            const savedFolderId = localStorage.getItem('gallery_folder_id');
+            // API 키와 폴더 ID 자동 입력
+            document.getElementById('apiKey').value = apiKey;
+            document.getElementById('folderId').value = folderId;
             
-            if (savedApiKey) {
-                document.getElementById('apiKey').value = savedApiKey;
-            }
+            showStatus('🎉 환영합니다! 잠시 후 자동으로 사진을 불러옵니다...', 'info');
             
-            if (savedFolderId) {
-                document.getElementById('folderId').value = savedFolderId;
-            }
-            
-            showStatus('🎉 환영합니다! API 키를 입력하고 연결 테스트를 해보세요.', 'info');
+            // 2초 후 자동으로 갤러리 로드
+            setTimeout(() => {
+                loadGallery();
+            }, 2000);
         });
 
         // 상태 메시지 표시
@@ -617,17 +606,7 @@
 
         // 갤러리 불러오기
         async function loadGallery() {
-            apiKey = document.getElementById('apiKey').value.trim();
-            folderId = document.getElementById('folderId').value.trim();
-            
-            if (!apiKey || !folderId) {
-                showStatus('⚠️ API 키와 폴더 ID를 모두 입력해주세요.', 'error');
-                return;
-            }
-            
-            // 설정 저장
-            localStorage.setItem('gallery_api_key', apiKey);
-            localStorage.setItem('gallery_folder_id', folderId);
+            // API 키와 폴더 ID는 이미 전역 변수에 설정됨
             
             const container = document.getElementById('galleryContainer');
             container.innerHTML = `
